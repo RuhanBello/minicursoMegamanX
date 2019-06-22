@@ -8,6 +8,12 @@ public class CharacterController : MonoBehaviour
   public float JumpForce;
 
   public bool IsGrounded;
+  public bool OnLeftWall;
+  public bool OnRightWall;
+  public bool IsClimbing;
+
+  public GameObject ProjectilePrefab;
+  public Transform ProjectileOrigin;
 
   public Rigidbody2D Rigidbody;
 
@@ -29,6 +35,8 @@ public class CharacterController : MonoBehaviour
   {
     Movement();
     Jump();
+    Climb();
+    Shoot();
     Flip();
     Animate();
   }
@@ -43,17 +51,31 @@ public class CharacterController : MonoBehaviour
   private void Flip()
   {
     if (_horizontal > 0)
-      _spriteRenderer.flipX = false;
+      transform.localScale = new Vector3(1, 1, 1);
 
     if (_horizontal < 0)
-      _spriteRenderer.flipX = true;
+      transform.localScale = new Vector3(-1, 1, 1);
   }
 
   private void Jump()
   {
-    if (Input.GetKeyDown(KeyCode.Space) && IsGrounded)
+    if (Input.GetKeyDown(KeyCode.Space))
     {
-      Rigidbody.AddForce(new Vector2(0, JumpForce));
+      if (IsGrounded)
+      {
+        Rigidbody.AddForce(new Vector2(0, JumpForce));
+      }
+      else
+      {
+        if (IsClimbing)
+        {
+          if(OnLeftWall)
+            Rigidbody.AddForce(new Vector2(220, 180));
+
+          if(OnRightWall)
+            Rigidbody.AddForce(new Vector2(-220, 180));
+        }
+      }
     }
 
     if (Input.GetKeyUp(KeyCode.Space) && Rigidbody.velocity.y > 0)
@@ -62,8 +84,34 @@ public class CharacterController : MonoBehaviour
     }
   }
 
+  private void Climb()
+  {
+    if (((_horizontal < 0 && OnLeftWall) || (_horizontal > 0 && OnRightWall)) && Rigidbody.velocity.y <= 0)
+    {
+      Rigidbody.velocity = new Vector2(0, -0.5f);
+      IsClimbing = true;
+      Animator.SetBool("isClimbing", true);
+    }
+    else
+    {
+      IsClimbing = false;
+      Animator.SetBool("isClimbing", false);
+    }
+  }
+
+  private void Shoot()
+  {
+    if (Input.GetMouseButtonUp(0))
+    {
+      GameObject newProjectile = Instantiate(ProjectilePrefab, ProjectileOrigin.position, Quaternion.identity);
+      Projectile p = newProjectile.GetComponent<Projectile>();
+      p.Direction = (int)transform.localScale.x;
+    }
+  }
+
   private void Animate()
   {
     Animator.SetFloat("hSpeed", Mathf.Abs(_horizontal));
+    Animator.SetFloat("vSpeed", Rigidbody.velocity.y);
   }
 }

@@ -8,11 +8,19 @@ public class GroundDetector : MonoBehaviour
 
   private void OnTriggerEnter2D(Collider2D collision)
   {
-    CharacterController.IsGrounded = true;
+    if (collision.tag == "Ground")
+    {
+      CharacterController.IsGrounded = true;
+      CharacterController.Animator.SetBool("isGrounded", true);
+    }
   }
 
   private void OnTriggerExit2D(Collider2D collision)
   {
-    CharacterController.IsGrounded = false;
+    if (collision.tag == "Ground")
+    {
+      CharacterController.IsGrounded = false;
+      CharacterController.Animator.SetBool("isGrounded", false);
+    }
   }
 }
