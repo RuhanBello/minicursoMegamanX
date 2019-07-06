@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 465396226934431831}
   - component: {fileID: 1285349208064972848}
   m_Layer: 0
-  m_Name: Projectile_0
+  m_Name: MediumProjectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -70,7 +70,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
-  m_Sprite: {fileID: 21300192, guid: 7847713512b16ab4da39bb90a75ecbd4, type: 3}
+  m_Sprite: {fileID: 21300202, guid: 7847713512b16ab4da39bb90a75ecbd4, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -94,7 +94,7 @@ CircleCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0.125, y: 0}
   serializedVersion: 2
   m_Radius: 0.04
 --- !u!114 &1285349208064972848
@@ -109,4 +109,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19a673c557f54e54e9ce22f410db453e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Character: {fileID: 0}
   Speed: 6
+  Direction: 0
+  Damage: 2

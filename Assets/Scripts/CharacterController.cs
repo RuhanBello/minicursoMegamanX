@@ -8,12 +8,20 @@ public class CharacterController : MonoBehaviour
   public float JumpForce;
 
   public bool IsGrounded;
-  public bool OnLeftWall;
-  public bool OnRightWall;
+  public bool OnWall;
   public bool IsClimbing;
 
-  public GameObject ProjectilePrefab;
+  public GameObject SmallProjectile;
+  public GameObject MediumProjectile;
+  public GameObject BigProjectile;
+
   public Transform ProjectileOrigin;
+  public bool CanShoot = true;
+  public float ShootDelay;
+  public int ProjectilesLimit = 3;
+  public int CurrentProjectilesAmount = 0;
+
+  public float ChargingTimer;
 
   public Rigidbody2D Rigidbody;
 
@@ -69,11 +77,11 @@ public class CharacterController : MonoBehaviour
       {
         if (IsClimbing)
         {
-          if(OnLeftWall)
-            Rigidbody.AddForce(new Vector2(220, 180));
-
-          if(OnRightWall)
+          if (transform.localScale.x > 0)
             Rigidbody.AddForce(new Vector2(-220, 180));
+
+          if (transform.localScale.x < 0)
+            Rigidbody.AddForce(new Vector2(220, 180));
         }
       }
     }
@@ -86,7 +94,7 @@ public class CharacterController : MonoBehaviour
 
   private void Climb()
   {
-    if (((_horizontal < 0 && OnLeftWall) || (_horizontal > 0 && OnRightWall)) && Rigidbody.velocity.y <= 0)
+    if (OnWall && _horizontal != 0 && Rigidbody.velocity.y <= 0)
     {
       Rigidbody.velocity = new Vector2(0, -0.5f);
       IsClimbing = true;
@@ -101,12 +109,48 @@ public class CharacterController : MonoBehaviour
 
   private void Shoot()
   {
-    if (Input.GetMouseButtonUp(0))
+    if (Input.GetMouseButton(0))
     {
-      GameObject newProjectile = Instantiate(ProjectilePrefab, ProjectileOrigin.position, Quaternion.identity);
+      ChargingTimer += Time.deltaTime;
+    }
+
+    if (Input.GetMouseButtonUp(0) && CanShoot && CurrentProjectilesAmount < ProjectilesLimit)
+    {
+      GameObject selectedProjectile = null;
+      if(ChargingTimer > 0 && ChargingTimer <= 1)
+      {
+        selectedProjectile = SmallProjectile;
+      }
+
+      if(ChargingTimer > 1 && ChargingTimer <= 3)
+      {
+        selectedProjectile = MediumProjectile;
+      }
+
+      if(ChargingTimer > 3)
+      {
+        selectedProjectile = BigProjectile;
+      }
+
+      ChargingTimer = 0;
+
+      GameObject newProjectile = Instantiate(selectedProjectile, ProjectileOrigin.position, Quaternion.identity);
       Projectile p = newProjectile.GetComponent<Projectile>();
       p.Direction = (int)transform.localScale.x;
+      p.Character = this;
+
+      newProjectile.transform.localScale = new Vector3(p.Direction, 1, 1);
+      CurrentProjectilesAmount++;
+
+      StartCoroutine(ShootDelayCoroutine());
     }
+  }
+
+  private IEnumerator ShootDelayCoroutine()
+  {
+    CanShoot = false;
+    yield return new WaitForSeconds(ShootDelay);
+    CanShoot = true;
   }
 
   private void Animate()
